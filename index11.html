@@ -6,13 +6,13 @@
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <title>Game Home</title>
     <style>
-        /* This is where the styling begins. Do not remove this <style> tag */
-        
+        /* CSS STYLES START HERE */
         body {
             margin: 0;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            /* Gaming Background Setup */
+            /* Dark Blue Gaming Background */
             background-color: #0f172a;
+            /* Grid Pattern */
             background-image: 
                 linear-gradient(rgba(6, 182, 212, 0.1) 1px, transparent 1px), 
                 linear-gradient(90deg, rgba(6, 182, 212, 0.1) 1px, transparent 1px),
@@ -24,35 +24,28 @@
             justify-content: center;
             height: 100vh;
             overflow: hidden;
+            /* Animation */
             animation: moveGrid 20s linear infinite;
         }
 
-        /* Animation for the background moving */
         @keyframes moveGrid {
             0% { background-position: 0 0, 0 0, 50% 50%; }
             100% { background-position: 50px 50px, 50px 50px, 50% 50%; }
         }
 
         .card {
-            /* Glassmorphism Effect */
-            background: rgba(20, 33, 61, 0.85);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
+            background: rgba(20, 33, 61, 0.9);
             padding: 40px 30px;
             border-radius: 16px;
             border: 1px solid rgba(255, 255, 255, 0.1);
-            box-shadow: 
-                0 0 30px rgba(6, 182, 212, 0.2),
-                0 0 60px rgba(0, 0, 0, 0.6);
+            box-shadow: 0 0 40px rgba(0, 0, 0, 0.7);
             text-align: center;
             width: 300px;
-            position: relative;
-            z-index: 10;
+            backdrop-filter: blur(5px);
         }
 
         h1 {
             margin-bottom: 25px;
-            font-size: 2rem;
             text-transform: uppercase;
             letter-spacing: 2px;
             text-shadow: 0 0 10px rgba(6, 182, 212, 0.7);
@@ -71,22 +64,15 @@
             cursor: pointer;
             font-weight: bold;
             text-decoration: none;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            transition: transform 0.2s, box-shadow 0.2s;
-            box-sizing: border-box; 
+            box-sizing: border-box;
+            transition: transform 0.2s;
         }
 
         .btn:hover {
             transform: translateY(-3px);
             box-shadow: 0 0 15px rgba(6, 182, 212, 0.6);
         }
-
-        .btn:active {
-            transform: translateY(1px);
-        }
-
-        /* This is where styling ends. Do not remove this </style> tag */
+        /* CSS STYLES END HERE */
     </style>
 </head>
 
@@ -94,15 +80,10 @@
 
     <div class="card">
         <h1>Select Mode</h1>
-
         <a class="btn" href="https://htmlpreview.github.io/?https://github.com/jakariya11-netjon/Tic-Tac-Toe/blob/main/index3.html">Easy Mode</a>
-
         <a class="btn" href="https://htmlpreview.github.io/?https://github.com/jakariya11-netjon/Tic-Tac-Toe/blob/main/index4.html">Medium Mode</a>
-
         <a class="btn" href="https://htmlpreview.github.io/?https://github.com/jakariya11-netjon/Tic-Tac-Toe/blob/main/index2.html">Hard Mode</a>
-
     </div>
 
 </body>
-
 </html>
