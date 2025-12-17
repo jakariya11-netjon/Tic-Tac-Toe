@@ -1,13 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Tic Tac Toe – Select Mode</title>
 
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Poppins:wght@300;600&display=swap"
-      rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Poppins:wght@300;600&display=swap" rel="stylesheet">
 
 <style>
 body{
@@ -90,36 +88,25 @@ transform:scale(1.05);
 <div class="card">
 <h2>Game Mode</h2>
 
-<!-- VS FRIEND (offline/local) -->
+<!-- VS FRIEND -->
 <button class="btn btn-friends"
-<button onclick="location.href='https://jakariya11-netjon.github.io/Tic-Tac-Toe/with_friends.html'">
+onclick="location.href='https://jakariya11-netjon.github.io/Tic-Tac-Toe/with_friends.html'">
 👥 VS Friend
 </button>
 
-<!-- ✅ VS COMPUTER (FIXED LINK) -->
+<!-- VS COMPUTER (FIXED – RUNNING PAGE) -->
 <button class="btn btn-computer"
-onclick="go('https://github.com/jakariya11-netjon/Tic-Tac-Toe/blob/main/with_friends.html')">
+onclick="location.href='https://jakariya11-netjon.github.io/Tic-Tac-Toe/vs_computer.html'">
 🤖 VS Computer
 </button>
 
-<!-- ONLINE ROOM (future Firebase) -->
+<!-- ONLINE ROOM -->
 <button class="btn btn-online"
-onclick="go('https://jakariya11-netjon.github.io/Tic-Tac-Toe/online.html')">
+onclick="location.href='https://jakariya11-netjon.github.io/Tic-Tac-Toe/online.html'">
 🌐 Online Room
 </button>
-</div>
 
-<script>
-function go(page){
-setTimeout(()=>{
-window.location.href = page;
-},200);
-}
-</script>
+</div>
 
 </body>
 </html>
-
-
-
-
