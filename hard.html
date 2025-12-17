@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Tic Tac Toe — Hard AI</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: #0f172a;
+            /* Dark Blue */
+            color: white;
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .game-box {
+            background: #1e293b;
+            /* Slate Card */
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            width: 320px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.4);
+        }
+
+        .board {
+            margin-top: 20px;
+            display: grid;
+            grid-template-columns: repeat(3, 90px);
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .cell {
+            width: 90px;
+            height: 90px;
+            background: #334155;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 2.5em;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: 0.2s;
+            position: relative;
+            overflow: hidden;
+            user-select: none;
+        }
+
+        .cell:hover {
+            background: #475569;
+            transform: translateY(-2px);
+        }
+
+        .btn {
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 16px;
+            background: #0ea5e9;
+            border: none;
+            color: white;
+            border-radius: 6px;
+            cursor: pointer;
+            width: 100%;
+        }
+
+        .btn:hover {
+            background: #0284c7;
+        }
+
+        /* Winner Animation */
+        .winner {
+            animation: glowScale 0.7s ease forwards;
+            box-shadow: 0 0 20px #ff4500;
+            background-color: #64748b;
+        }
+
+        @keyframes glowScale {
+            0% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.1);
+                box-shadow: 0 0 30px #ff7700;
+            }
+
+            100% {
+                transform: scale(1.05);
+                box-shadow: 0 0 25px #ff3300;
+            }
+        }
+
+        .explosion {
+            position: absolute;
+            width: 120px;
+            height: 120px;
+            background: radial-gradient(circle, #ffcc00, #ff5500, #ff0000);
+            border-radius: 50%;
+            animation: boom 0.5s ease-out forwards;
+            opacity: 0.9;
+            z-index: 5;
+            left: -15px;
+            top: -15px;
+            pointer-events: none;
+        }
+
+        @keyframes boom {
+            0% {
+                transform: scale(0.2);
+                opacity: 0.8;
+            }
+
+            50% {
+                transform: scale(1.4);
+                opacity: 1;
+            }
+
+            100% {
+                transform: scale(0);
+                opacity: 0;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="game-box">
+        <h2>Tic Tac Toe (Hard Mode)</h2>
+        <div id="status">Turn: <span id="turn">X</span></div>
+
+        <div class="board" id="board">
+            <div class="cell" data-index="0"></div>
+            <div class="cell" data-index="1"></div>
+            <div class="cell" data-index="2"></div>
+            <div class="cell" data-index="3"></div>
+            <div class="cell" data-index="4"></div>
+            <div class="cell" data-index="5"></div>
+            <div class="cell" data-index="6"></div>
+            <div class="cell" data-index="7"></div>
+            <div class="cell" data-index="8"></div>
+        </div>
+
+        <button id="reset" class="btn">Restart Game</button>
+    </div>
+
+    <audio id="tapSound" src="pop-402322.mp3"></audio>
+    <audio id="winSound" src="loud-fanfare-trumpet-effect-05-412046.mp3"></audio>
+    <audio id="tieSound" src="tie.mp3"></audio>
+    <audio id="loseSound" src="loss.mp3"></audio>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const statusBox = document.getElementById("status");
+            const uiCells = document.querySelectorAll(".cell");
+            const resetBtn = document.getElementById("reset");
+
+            const tapSound = document.getElementById("tapSound");
+            const winSound = document.getElementById("winSound");
+            const tieSound = document.getElementById("tieSound");
+            const loseSound = document.getElementById("loseSound");
+
+            let gameActive = true;
+            let currentPlayer = "X";
+            let boardState = ["", "", "", "", "", "", "", "", ""];
+            let autoResetTimer = null;
+
+            // 1. ADD CLICK LISTENERS
+            uiCells.forEach((cell, index) => {
+                cell.addEventListener("click", () => handleClick(index));
+            });
+
+            resetBtn.addEventListener("click", resetGame);
+
+            // 2. Handle Human Click
+            function handleClick(index) {
+                // Prevent click if game over, cell full, or not human turn
+                if (!gameActive || boardState[index] !== "" || currentPlayer !== "X") return;
+
+                makeMove(index, "X");
+
+                if (gameActive) {
+                    // Small delay before computer plays
+                    setTimeout(computerMoveHard, 300);
+                }
+            }
+
+            // 3. Make Move (Shared Logic)
+            function makeMove(index, player) {
+                boardState[index] = player;
+                uiCells[index].innerText = player;
+                safePlay(tapSound);
+
+                const winPattern = checkWin(boardState, player);
+                if (winPattern) {
+                    endGame(winPattern, player);
+                    return;
+                }
+
+                if (!boardState.includes("")) {
+                    statusBox.innerText = "It's a Tie!";
+                    gameActive = false;
+                    safePlay(tieSound);
+                    scheduleAutoReset();
+                    return;
+                }
+
+                currentPlayer = (player === "X") ? "O" : "X";
+                statusBox.innerHTML = `Turn: <span id='turn'>${currentPlayer}</span>`;
+            }
+
+            // --------------------------
+            // Hard AI Logic (Minimax)
+            // --------------------------
+            function computerMoveHard() {
+                if (!gameActive) return;
+
+                let bestScore = -Infinity;
+                let bestMove = -1;
+
+                // Loop through all empty spots
+                for (let i = 0; i < 9; i++) {
+                    if (boardState[i] === "") {
+                        boardState[i] = "O"; // AI makes a move
+                        let score = minimax(boardState, 0, false);
+                        boardState[i] = ""; // Undo move
+                        if (score > bestScore) {
+                            bestScore = score;
+                            bestMove = i;
+                        }
+                    }
+                }
+
+                if (bestMove !== -1) {
+                    makeMove(bestMove, "O");
+                }
+            }
+
+            // The Minimax Algorithm
+            function minimax(board, depth, isMaximizing) {
+                // Check terminal states
+                if (checkWin(board, "O")) return 10 - depth;
+                if (checkWin(board, "X")) return depth - 10;
+                if (!board.includes("")) return 0;
+
+                if (isMaximizing) {
+                    let bestScore = -Infinity;
+                    for (let i = 0; i < 9; i++) {
+                        if (board[i] === "") {
+                            board[i] = "O";
+                            let score = minimax(board, depth + 1, false);
+                            board[i] = "";
+                            bestScore = Math.max(score, bestScore);
+                        }
+                    }
+                    return bestScore;
+                } else {
+                    let bestScore = Infinity;
+                    for (let i = 0; i < 9; i++) {
+                        if (board[i] === "") {
+                            board[i] = "X";
+                            let score = minimax(board, depth + 1, true);
+                            board[i] = "";
+                            bestScore = Math.min(score, bestScore);
+                        }
+                    }
+                    return bestScore;
+                }
+            }
+
+            // --------------------------
+            // Win Logic (Modified for Minimax)
+            // --------------------------
+            function checkWin(board, player) {
+                const wins = [
+                    [0, 1, 2], [3, 4, 5], [6, 7, 8],
+                    [0, 3, 6], [1, 4, 7], [2, 5, 8],
+                    [0, 4, 8], [2, 4, 6]
+                ];
+                for (let w of wins) {
+                    if (board[w[0]] === player && board[w[1]] === player && board[w[2]] === player) {
+                        return w;
+                    }
+                }
+                return null;
+            }
+
+            function endGame(pattern, winner) {
+                if (autoResetTimer) clearTimeout(autoResetTimer);
+                gameActive = false;
+                statusBox.innerText = (winner === "X") ? "You Win!" : "Computer Wins!";
+
+                if (winner === "X") safePlay(winSound);
+                else safePlay(loseSound);
+
+                pattern.forEach(idx => {
+                    uiCells[idx].classList.add("winner");
+                    let boom = document.createElement("div");
+                    boom.classList.add("explosion");
+                    uiCells[idx].appendChild(boom);
+                    setTimeout(() => boom.remove(), 700);
+                });
+
+                scheduleAutoReset();
+            }
+
+            function resetGame() {
+                if (autoResetTimer) clearTimeout(autoResetTimer);
+                boardState = ["", "", "", "", "", "", "", "", ""];
+                gameActive = true;
+                currentPlayer = "X";
+                statusBox.innerHTML = "Turn: <span id='turn'>X</span>";
+
+                uiCells.forEach(cell => {
+                    cell.innerText = "";
+                    cell.classList.remove("winner");
+                });
+            }
+
+            function scheduleAutoReset() {
+                autoResetTimer = setTimeout(resetGame, 3000);
+            }
+
+            function safePlay(audio) {
+                if (!audio) return;
+                try { audio.currentTime = 0; audio.play().catch(() => { }); } catch (e) { }
+            }
+        });
+    </script>
+</body>
+
+</html>
