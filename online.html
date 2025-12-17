@@ -66,14 +66,14 @@ button{cursor:pointer}
   <p id="playerInfo"></p>
   <p id="turnInfo"></p>
 
-  <div class="board" id="board">
+  <div class="board">
     <div class="cell" onclick="move(0)"></div>
     <div class="cell" onclick="move(1)"></div>
     <div class="cell" onclick="move(2)"></div>
     <div class="cell" onclick="move(3)"></div>
     <div class="cell" onclick="move(4)"></div>
     <div class="cell" onclick="move(5)"></div>
-    <div class="cell" onclick="move(6 hookup)"></div>
+    <div class="cell" onclick="move(6)"></div>
     <div class="cell" onclick="move(7)"></div>
     <div class="cell" onclick="move(8)"></div>
   </div>
@@ -106,8 +106,7 @@ function createRoom(){
 
   db.ref("rooms/"+room).set({
     board:["","","","","","","","",""],
-    turn:"X",
-    status:"playing"
+    turn:"X"
   });
 
   startGame();
@@ -156,7 +155,6 @@ function move(i){
 
     data.board[i] = player;
     data.turn = (player==="X") ? "O" : "X";
-
     db.ref("rooms/"+room).set(data);
   });
 }
@@ -168,11 +166,7 @@ function updateBoard(b){
 }
 
 function checkWinner(b){
-  const w = [
-    [0,1,2],[3,4,5],[6,7,8],
-    [0,3,6],[1,4,7],[2,5,8],
-    [0,4,8],[2,4,6]
-  ];
+  const w=[[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
   for(let a of w){
     if(b[a[0]] && b[a[0]]===b[a[1]] && b[a[1]]===b[a[2]])
       return b[a[0]];
