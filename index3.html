@@ -1,4 +1,3 @@
-<!-- FULL COMBINED GAME (Easy AI) — Auto-reset 3s + user sound filenames preserved -->
 <!DOCTYPE html>
 <html lang="en">
 
@@ -10,7 +9,7 @@
         body {
             margin: 0;
             padding: 0;
-            background: #0f172a;
+            background: #0f172a; /* Dark Blue Background */
             color: white;
             font-family: Arial, sans-serif;
             display: flex;
@@ -20,7 +19,7 @@
         }
 
         .game-box {
-            background: #1e293b;
+            background: #1e293b; /* Slate Card Color */
             padding: 20px;
             border-radius: 12px;
             text-align: center;
@@ -58,7 +57,7 @@
         }
 
         .btn {
-            margin-top: 10px;
+            margin-top: 20px;
             padding: 10px 20px;
             font-size: 16px;
             background: #0ea5e9;
@@ -73,97 +72,52 @@
             background: #0284c7;
         }
 
-        .small-btn {
-            margin-top: 10px;
-            padding: 6px 10px;
-            font-size: 14px;
-            background: #22c55e;
-            border: none;
-            color: white;
-            border-radius: 6px;
-            cursor: pointer;
-            width: 100%;
-        }
-
-        .small-btn:hover {
-            background: #15803d;
-        }
-
+        /* Winner Animation */
         .winner {
             animation: glowScale 0.7s ease forwards;
             box-shadow: 0 0 20px #ff4500;
+            background-color: #64748b; /* Lighter highlight */
         }
 
         @keyframes glowScale {
-            0% {
-                transform: scale(1);
-            }
-
-            50% {
-                transform: scale(1.25);
-                box-shadow: 0 0 30px #ff7700;
-            }
-
-            100% {
-                transform: scale(1.15);
-                box-shadow: 0 0 25px #ff3300;
-            }
-        }
-
-        .explosion {
-            position: absolute;
-            width: 120px;
-            height: 120px;
-            background: radial-gradient(circle, #ffcc00, #ff5500, #ff0000);
-            border-radius: 50%;
-            animation: boom 0.5s ease-out forwards;
-            opacity: 0.9;
-            z-index: 5;
-            left: -15px;
-            top: -15px;
-            pointer-events: none;
-        }
-
-        @keyframes boom {
-            0% {
-                transform: scale(0.2);
-                opacity: 0.8;
-            }
-
-            50% {
-                transform: scale(1.4);
-                opacity: 1;
-            }
-
-            100% {
-                transform: scale(0);
-                opacity: 0;
-            }
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); box-shadow: 0 0 30px #ff7700; }
+            100% { transform: scale(1.05); box-shadow: 0 0 25px #ff3300; }
         }
     </style>
 </head>
 
 <body>
     <div class="game-box">
-        <h2>Tic Tac Toe</h2>
+        <h2>Tic Tac Toe (Easy Mode)</h2>
         <div id="status">Turn: <span id="turn">X</span></div>
-        <div class="board" id="board"></div>
-        <button id="reset" class="btn">Restart Game</button>
-        <button id="toggleMode" class="small-btn">Play vs Computer: OFF</button>
+
+        <div class="board" id="board">
+            <div class="cell" onclick="handleClick(0)"></div>
+            <div class="cell" onclick="handleClick(1)"></div>
+            <div class="cell" onclick="handleClick(2)"></div>
+            <div class="cell" onclick="handleClick(3)"></div>
+            <div class="cell" onclick="handleClick(4)"></div>
+            <div class="cell" onclick="handleClick(5)"></div>
+            <div class="cell" onclick="handleClick(6)"></div>
+            <div class="cell" onclick="handleClick(7)"></div>
+            <div class="cell" onclick="handleClick(8)"></div>
+        </div>
+
+        <button id="reset" class="btn" onclick="resetGame()">Restart Game</button>
     </div>
 
-    <!-- Sounds: filenames preserved -->
     <audio id="tapSound" src="pop-402322.mp3"></audio>
     <audio id="winSound" src="loud-fanfare-trumpet-effect-05-412046.mp3"></audio>
     <audio id="tieSound" src="tie.mp3"></audio>
     <audio id="loseSound" src="loss.mp3"></audio>
 
     <script>
-        const board = document.getElementById("board");
         const statusBox = document.getElementById("status");
         let turnText = document.getElementById("turn");
-        const resetBtn = document.getElementById("reset");
-        const modeBtn = document.getElementById("toggleMode");
+        
+        // We select the boxes we just created in HTML
+        const uiCells = document.getElementsByClassName("cell");
 
         const tapSound = document.getElementById("tapSound");
         const winSound = document.getElementById("winSound");
@@ -171,184 +125,137 @@
         const loseSound = document.getElementById("loseSound");
 
         let gameActive = true;
-        let currentPlayer = "X";
-        let cells = Array(9).fill("");
-        let vsComputer = false;
+        let currentPlayer = "X"; // Human is always X
+        let boardState = ["", "", "", "", "", "", "", "", ""]; // Tracks the data
         let autoResetTimer = null;
 
-        function createBoard() {
-            board.innerHTML = "";
-            cells.forEach((v, i) => {
-                const div = document.createElement("div");
-                div.classList.add("cell");
-                div.onclick = () => handleClick(i);
-                board.appendChild(div);
-            });
-        }
+        // 1. Handle Human Click
+        function handleClick(index) {
+            // Check if game active, cell empty, AND it is Human's turn
+            if (!gameActive || boardState[index] !== "" || currentPlayer !== "X") return;
 
-        function handleClick(i) {
-            if (!gameActive || cells[i] !== "") return;
+            // Human Move
+            makeMove(index, "X");
 
-            // If vsComputer AND it's not player's (X) turn then ignore clicks.
-            if (vsComputer && currentPlayer !== "X") return;
-
-            playerMove(i);
-
-            // AI should run ONLY when computer mode ON AND it is O's turn
-            if (vsComputer && gameActive && currentPlayer === "O") {
-                setTimeout(() => computerMoveEasy(), 300);
+            // If game still active, Computer Move after delay
+            if (gameActive) {
+                setTimeout(computerMoveEasy, 500); 
             }
         }
 
-        function playerMove(i) {
-            cells[i] = currentPlayer;
-            board.children[i].textContent = currentPlayer;
+        // 2. Apply Move (Used by both Human and Computer)
+        function makeMove(index, player) {
+            boardState[index] = player;
+            uiCells[index].innerText = player; // Update the HTML
+            
             safePlay(tapSound);
 
-            const winPattern = checkWin();
+            // Check Win
+            const winPattern = checkWin(player);
             if (winPattern) {
-                triggerWinEffect(winPattern);
+                endGame(winPattern, player);
                 return;
             }
 
-            if (!cells.includes("")) {
-                statusBox.innerHTML = "It's a Tie!";
+            // Check Tie
+            if (!boardState.includes("")) {
+                statusBox.innerText = "It's a Tie!";
                 gameActive = false;
                 safePlay(tieSound);
                 scheduleAutoReset();
                 return;
             }
 
-            // switch turn
-            currentPlayer = currentPlayer === "X" ? "O" : "X";
-            if (turnText) turnText.textContent = currentPlayer;
+            // Switch internal turn tracker
+            currentPlayer = (player === "X") ? "O" : "X";
+            if (turnText) turnText.innerText = currentPlayer;
         }
 
-        // --------------------------
-        // Easy AI (random with center preference)
-        // --------------------------
+        // 3. Easy AI (Random + Center Preference)
         function computerMoveEasy() {
             if (!gameActive) return;
-            if (currentPlayer !== "O") return;
 
-            let empty = [];
-            cells.forEach((v, i) => { if (v === "") empty.push(i); });
-            if (empty.length === 0) return;
+            // Find all empty spots
+            let emptyIndices = [];
+            boardState.forEach((val, idx) => {
+                if (val === "") emptyIndices.push(idx);
+            });
 
-            // prefer center if free
-            if (cells[4] === "") {
-                makeComputerPlay(4);
-                return;
+            if (emptyIndices.length === 0) return;
+
+            let pick;
+            // Simple Logic: Prefer center (index 4) if available, else random
+            if (boardState[4] === "") {
+                pick = 4;
+            } else {
+                pick = emptyIndices[Math.floor(Math.random() * emptyIndices.length)];
             }
 
-            // pick a random empty cell
-            const pick = empty[Math.floor(Math.random() * empty.length)];
-            makeComputerPlay(pick);
+            makeMove(pick, "O");
         }
 
-        function makeComputerPlay(index) {
-            cells[index] = "O";
-            board.children[index].textContent = "O";
-            safePlay(tapSound);
-
-            const winPattern = checkWin();
-            if (winPattern) {
-                triggerWinEffect(winPattern);
-                return;
-            }
-
-            if (!cells.includes("")) {
-                statusBox.innerHTML = "It's a Tie!";
-                gameActive = false;
-                safePlay(tieSound);
-                scheduleAutoReset();
-                return;
-            }
-
-            currentPlayer = "X";
-            if (turnText) turnText.textContent = currentPlayer;
-        }
-
-        // --------------------------
-        // Helpers: win check, effects, reset, sounds
-        // --------------------------
-        function checkWin() {
-            const pattern = [
-                [0, 1, 2], [3, 4, 5], [6, 7, 8],
-                [0, 3, 6], [1, 4, 7], [2, 5, 8],
-                [0, 4, 8], [2, 4, 6]
+        // 4. Win Checking Logic
+        function checkWin(player) {
+            const winConditions = [
+                [0, 1, 2], [3, 4, 5], [6, 7, 8], // Rows
+                [0, 3, 6], [1, 4, 7], [2, 5, 8], // Columns
+                [0, 4, 8], [2, 4, 6]             // Diagonals
             ];
-            for (let p of pattern) {
-                const [a, b, c] = p;
-                if (cells[a] && cells[a] === cells[b] && cells[a] === cells[c]) return p;
+            for (let condition of winConditions) {
+                const [a, b, c] = condition;
+                if (boardState[a] === player && boardState[b] === player && boardState[c] === player) {
+                    return condition;
+                }
             }
             return null;
         }
 
-        function triggerWinEffect(pattern) {
-            if (autoResetTimer) { clearTimeout(autoResetTimer); autoResetTimer = null; }
-
+        // 5. Game Over / Win Effects
+        function endGame(pattern, winner) {
+            if (autoResetTimer) clearTimeout(autoResetTimer);
+            
             gameActive = false;
-            statusBox.innerHTML = `${currentPlayer} Wins!`;
-            safePlay(winSound);
+            statusBox.innerText = (winner === "X") ? "You Win!" : "Computer Wins!";
+            
+            if(winner === "X") safePlay(winSound);
+            else safePlay(loseSound);
 
-            pattern.forEach(i => {
-                let cell = board.children[i];
-                cell.classList.add("winner");
-                let boom = document.createElement("div");
-                boom.classList.add("explosion");
-                cell.appendChild(boom);
-                setTimeout(() => { if (boom && boom.remove) boom.remove(); }, 700);
+            // Highlight winning cells
+            pattern.forEach(index => {
+                uiCells[index].classList.add("winner");
             });
 
-            if (currentPlayer === 'O') safePlay(loseSound);
             scheduleAutoReset();
         }
 
-        function scheduleAutoReset() {
+        function resetGame() {
             if (autoResetTimer) clearTimeout(autoResetTimer);
-            autoResetTimer = setTimeout(() => {
-                resetBtn.click();
-                autoResetTimer = null;
-            }, 3000);
+            
+            boardState = ["", "", "", "", "", "", "", "", ""];
+            gameActive = true;
+            currentPlayer = "X";
+            statusBox.innerHTML = "Turn: <span id='turn'>X</span>";
+            turnText = document.getElementById("turn");
+
+            // Clear UI
+            for(let i=0; i<uiCells.length; i++) {
+                uiCells[i].innerText = "";
+                uiCells[i].classList.remove("winner");
+            }
         }
 
+        function scheduleAutoReset() {
+            autoResetTimer = setTimeout(resetGame, 3000);
+        }
+
+        // Helper to prevent crash if sound files are missing
         function safePlay(audio) {
             if (!audio) return;
             try {
                 audio.currentTime = 0;
-                const p = audio.play();
-                if (p && p.catch) p.catch(() => { });
+                audio.play().catch(() => {});
             } catch (e) { }
         }
-
-        // RESET: re-query the #turn span after innerHTML changes on reset
-        resetBtn.onclick = () => {
-            if (autoResetTimer) { clearTimeout(autoResetTimer); autoResetTimer = null; }
-
-            cells = Array(9).fill("");
-            currentPlayer = "X";
-
-            // recreate status HTML (new <span id="turn">)
-            statusBox.innerHTML = "Turn: <span id='turn'>X</span>";
-
-            // refresh reference to new span
-            turnText = document.getElementById("turn");
-            if (turnText) turnText.textContent = "X";
-
-            gameActive = true;
-            createBoard();
-        };
-
-        modeBtn.onclick = () => {
-            vsComputer = !vsComputer;
-            modeBtn.textContent = vsComputer ? "Play vs Computer: ON" : "Play vs Computer: OFF";
-            resetBtn.click();
-        };
-
-        // initial setup
-        createBoard();
     </script>
 </body>
-
 </html>
