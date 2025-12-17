@@ -1,38 +1,90 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Online Tic Tac Toe</title>
+    <title>Pro Tic Tac Toe Online</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
-        body { margin:0; font-family:Arial, sans-serif; background:#0f172a; color:#fff; display:flex; justify-content:center; align-items:center; height:100vh; }
-        .container { background:#1e293b; padding:20px; border-radius:12px; width:320px; text-align:center; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
-        input, button { width:100%; padding:12px; margin:8px 0; border-radius: 6px; border:none; font-size:16px; box-sizing: border-box; }
-        button { background: #3b82f6; color: white; font-weight: bold; cursor:pointer; }
-        button:hover { background: #2563eb; }
-        .board { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-top:15px; }
-        .cell { height:80px; background:#334155; font-size:36px; display:flex; justify-content:center; align-items:center; cursor:pointer; border-radius: 8px; transition: 0.2s; }
-        .cell:hover { background: #475569; }
+        /* Animated Gaming Background */
+        body { 
+            margin:0; 
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: linear-gradient(-45deg, #0f172a, #1e1b4b, #312e81, #1e293b);
+            background-size: 400% 400%;
+            animation: gradient 15s ease infinite;
+            color:#fff; 
+            display:flex; 
+            justify-content:center; 
+            align-items:center; 
+            height:100vh; 
+            overflow: hidden;
+        }
+
+        @keyframes gradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .container { 
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(12px);
+            padding: 30px; 
+            border-radius: 20px; 
+            width: 340px; 
+            text-align: center; 
+            box-shadow: 0 20px 50px rgba(0,0,0,0.4);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        h2 { margin-top: 0; letter-spacing: 1px; color: #60a5fa; }
+
+        input, button { 
+            width:100%; padding:14px; margin:10px 0; border-radius: 10px; 
+            border:none; font-size:16px; box-sizing: border-box; transition: 0.3s;
+        }
+
+        input { background: #334155; color: white; outline: none; border: 1px solid #475569; }
+        input:focus { border-color: #3b82f6; }
+
+        button { background: #3b82f6; color: white; font-weight: bold; cursor:pointer; text-transform: uppercase; }
+        button:hover { background: #2563eb; transform: translateY(-2px); box-shadow: 0 5px 15px rgba(59, 130, 246, 0.4); }
+        button:active { transform: translateY(0); }
+
+        .board { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-top:20px; }
+        .cell { 
+            height:90px; background: rgba(51, 65, 85, 0.6); font-size:42px; 
+            display:flex; justify-content:center; align-items:center; 
+            cursor:pointer; border-radius: 12px; transition: 0.2s;
+            border: 1px solid rgba(255,255,255,0.05);
+            font-weight: bold;
+        }
+        .cell:hover { background: rgba(71, 85, 105, 0.8); }
+
         .hidden { display:none; }
-        #roomDisplay { font-weight: bold; color: #10b981; font-size: 20px; letter-spacing: 2px; }
+        #roomDisplay { font-weight: bold; color: #10b981; font-size: 22px; letter-spacing: 3px; margin: 5px 0; }
+        #turnInfo { font-size: 18px; color: #94a3b8; margin-bottom: 10px; }
+        
+        /* Symbol Colors */
+        .x-mark { color: #60a5fa; text-shadow: 0 0 15px rgba(96, 165, 250, 0.6); }
+        .o-mark { color: #f87171; text-shadow: 0 0 15px rgba(248, 113, 113, 0.6); }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h2>Tic Tac Toe Online</h2>
+    <h2>TIC TAC TOE</h2>
 
     <div id="roomUI">
         <button onclick="createRoom()">Create New Game</button>
-        <div style="margin: 15px 0; color: #94a3b8;">— OR —</div>
-        <input id="roomInput" placeholder="Enter 5-char code">
+        <div style="margin: 15px 0; color: #94a3b8; font-size: 14px;">— OR —</div>
+        <input id="roomInput" placeholder="Enter 5-digit code">
         <button style="background: #10b981;" onclick="joinRoom()">Join Game</button>
-        <p id="msg"></p>
     </div>
 
     <div id="gameUI" class="hidden">
-        <p id="roomDisplay"></p>
-        <p id="playerInfo"></p>
+        <div id="roomDisplay"></div>
+        <p id="playerInfo" style="margin: 5px 0; opacity: 0.8;"></p>
         <p id="turnInfo">Waiting for opponent...</p>
 
         <div class="board">
@@ -49,11 +101,15 @@
     </div>
 </div>
 
+<audio id="sound-tap" src="https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3"></audio>
+<audio id="sound-win" src="https://assets.mixkit.co/active_storage/sfx/1435/1435-preview.mp3"></audio>
+<audio id="sound-loss" src="https://assets.mixkit.co/active_storage/sfx/2019/2019-preview.mp3"></audio>
+<audio id="sound-draw" src="https://assets.mixkit.co/active_storage/sfx/2017/2017-preview.mp3"></audio>
+
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 
 <script>
-// --- CONFIGURATION ---
 const firebaseConfig = {
     apiKey: "AIzaSyB78J0GqZUvjmAmUsmHCTLO3vIqhQq1N8",
     authDomain: "tic-tac-toe-online-8af06.firebaseapp.com",
@@ -70,46 +126,44 @@ const db = firebase.database();
 let roomCode = "";
 let playerSign = "";
 let gameActive = false;
+let isResetting = false;
 
-// --- FUNCTIONS ---
+// --- SOUND WRAPPER ---
+function playSound(id) {
+    const s = document.getElementById(id);
+    s.currentTime = 0;
+    s.play().catch(e => console.log("Sound blocked by browser until first click"));
+}
 
 function createRoom() {
     roomCode = Math.random().toString(36).substring(2, 7).toUpperCase();
     playerSign = "X";
-    
-    // Initialize room in Firebase
     db.ref("rooms/" + roomCode).set({
         board: ["", "", "", "", "", "", "", "", ""],
         turn: "X",
-        status: "waiting" // Player 1 is waiting
+        status: "waiting",
+        resetTrigger: 0
     });
-
     showGameUI();
 }
 
 function joinRoom() {
     const input = document.getElementById("roomInput").value.trim().toUpperCase();
-    if (!input) return alert("Enter a code");
-
+    if (!input) return;
     db.ref("rooms/" + input).once("value", snap => {
-        if (!snap.exists()) {
-            alert("Room not found!");
-        } else {
-            roomCode = input;
-            playerSign = "O";
-            // Update status to 'playing' since 2nd player joined
-            db.ref("rooms/" + roomCode).update({ status: "playing" });
-            showGameUI();
-        }
+        if (!snap.exists()) return alert("Room not found!");
+        roomCode = input;
+        playerSign = "O";
+        db.ref("rooms/" + roomCode).update({ status: "playing" });
+        showGameUI();
     });
 }
 
 function showGameUI() {
     document.getElementById("roomUI").classList.add("hidden");
     document.getElementById("gameUI").classList.remove("hidden");
-    document.getElementById("roomDisplay").innerText = "CODE: " + roomCode;
+    document.getElementById("roomDisplay").innerText = roomCode;
     document.getElementById("playerInfo").innerText = "You are: " + playerSign;
-
     listenForUpdates();
 }
 
@@ -118,30 +172,27 @@ function listenForUpdates() {
         const data = snap.val();
         if (!data) return;
 
-        // 1. Update Board Visuals
+        // 1. Update Board
         const cells = document.querySelectorAll(".cell");
         data.board.forEach((val, i) => {
             cells[i].innerText = val;
-            cells[i].style.color = val === "X" ? "#60a5fa" : "#f87171";
+            cells[i].className = val === "X" ? "cell x-mark" : "cell o-mark";
         });
 
-        // 2. Check Game Status
+        // 2. Game Status
         if (data.status === "waiting") {
             document.getElementById("turnInfo").innerText = "Waiting for friend...";
             gameActive = false;
         } else if (data.status === "playing") {
             gameActive = true;
-            document.getElementById("turnInfo").innerText = (data.turn === playerSign) ? "Your Turn!" : "Friend's Turn...";
+            document.getElementById("turnInfo").innerText = (data.turn === playerSign) ? "YOUR TURN" : "THEY ARE THINKING...";
+            document.getElementById("turnInfo").style.color = (data.turn === playerSign) ? "#10b981" : "#94a3b8";
         }
 
-        // 3. Check for Winner
+        // 3. Winner Detection
         const winner = checkWinner(data.board);
-        if (winner) {
-            gameActive = false;
-            setTimeout(() => {
-                alert(winner === "draw" ? "It's a Draw!" : winner + " Wins!");
-                // Reset or remove room logic could go here
-            }, 100);
+        if (winner && !isResetting) {
+            handleGameOver(winner);
         }
     });
 }
@@ -151,14 +202,42 @@ function move(index) {
 
     db.ref("rooms/" + roomCode).once("value", snap => {
         const data = snap.val();
-        
-        // Only allow move if it's player's turn and cell is empty
-        if (data.turn === playerSign && data.board[index] === "") {
+        if (data.turn === playerSign && data.board[index] === "" && data.status === "playing") {
+            playSound('sound-tap');
             data.board[index] = playerSign;
             data.turn = (playerSign === "X") ? "O" : "X";
             db.ref("rooms/" + roomCode).update(data);
         }
     });
+}
+
+function handleGameOver(winner) {
+    gameActive = false;
+    isResetting = true;
+
+    // Play sounds
+    if (winner === "draw") {
+        playSound('sound-draw');
+        document.getElementById("turnInfo").innerText = "IT'S A DRAW!";
+    } else if (winner === playerSign) {
+        playSound('sound-win');
+        document.getElementById("turnInfo").innerText = "YOU WIN! 🎉";
+    } else {
+        playSound('sound-loss');
+        document.getElementById("turnInfo").innerText = "YOU LOST... 💀";
+    }
+
+    // 3 Second Reset Logic
+    setTimeout(() => {
+        if (playerSign === "X") { // Only one player needs to trigger the DB reset
+            db.ref("rooms/" + roomCode).update({
+                board: ["", "", "", "", "", "", "", "", ""],
+                turn: "X",
+                status: "playing"
+            });
+        }
+        isResetting = false;
+    }, 3000);
 }
 
 function checkWinner(b) {
