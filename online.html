@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Online Room</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+body{
+font-family:Arial;
+background:#0f172a;
+color:white;
+display:flex;
+justify-content:center;
+align-items:center;
+height:100vh;
+}
+.box{
+background:#1e293b;
+padding:20px;
+border-radius:10px;
+width:300px;
+text-align:center;
+}
+input,button{
+width:100%;
+padding:10px;
+margin:8px 0;
+font-size:16px;
+}
+button{cursor:pointer}
+</style>
+</head>
+
+<body>
+<div class="box">
+<h2>Online Room</h2>
+
+<button onclick="createRoom()">Create Room</button>
+
+<input id="roomId" placeholder="Enter Room Code">
+<button onclick="joinRoom()">Join Room</button>
+
+<p id="msg"></p>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyB78J0GqZUvjmAmUsmHCTLO3vIqhQq1N8",
+  authDomain: "tic-tac-toe-online-8af06.firebaseapp.com",
+  databaseURL: "https://tic-tac-toe-online-8af06-default-rtdb.firebaseio.com",
+  projectId: "tic-tac-toe-online-8af06",
+  storageBucket: "tic-tac-toe-online-8af06.firebasestorage.app",
+  messagingSenderId: "539479661784",
+  appId: "1:539479661784:web:078147d1569fbd93280bad",
+  measurementId: "G-LWHZ9B013C"
+};
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+
+let room = "";
+
+function createRoom(){
+  room = Math.random().toString(36).substring(2,7);
+  db.ref("rooms/"+room).set({
+    board:["","","","","","","","",""],
+    turn:"X"
+  });
+  document.getElementById("msg").innerText =
+    "Room Created: " + room + " (Share this code)";
+}
+
+function joinRoom(){
+  room = document.getElementById("roomId").value;
+  db.ref("rooms/"+room).once("value", snap=>{
+    if(snap.exists()){
+      alert("Joined Room: " + room);
+    }else{
+      alert("Room not found");
+    }
+  });
+}
+</script>
+</body>
+</html>
