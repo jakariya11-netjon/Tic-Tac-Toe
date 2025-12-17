@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tic Tac Toe – Select Difficulty</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Poppins:wght@300;600&display=swap" rel="stylesheet">
+
+<style>
+    /* Global Styles */
+    body {
+        margin: 0;
+        font-family: 'Poppins', sans-serif;
+        /* Deep Gaming Background Gradient */
+        background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+        color: white;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        overflow: hidden;
+    }
+
+    /* Main Card Container */
+    .card {
+        background: rgba(255, 255, 255, 0.05); /* Glass effect */
+        backdrop-filter: blur(10px);
+        padding: 40px;
+        border-radius: 20px;
+        width: 320px;
+        text-align: center;
+        box-shadow: 0 0 30px rgba(0, 0, 0, 0.7);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        animation: float 6s ease-in-out infinite;
+    }
+
+    /* Header Text */
+    h2 {
+        margin-bottom: 30px;
+        font-family: 'Orbitron', sans-serif;
+        font-size: 24px;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        color: #fff;
+        text-shadow: 0 0 10px #00d2ff;
+    }
+
+    /* General Button Styles */
+    .btn {
+        display: block;
+        width: 100%;
+        padding: 15px;
+        margin: 15px 0;
+        border: none;
+        border-radius: 50px; /* Rounded pill shape */
+        font-size: 16px;
+        font-weight: bold;
+        cursor: pointer;
+        color: white;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    }
+
+    /* 1. Easy - Neon Green */
+    .btn-easy {
+        background: linear-gradient(45deg, #2ecc71, #27ae60);
+    }
+    .btn-easy:hover {
+        box-shadow: 0 0 20px #2ecc71;
+        transform: scale(1.05);
+    }
+
+    /* 2. Medium - Neon Orange */
+    .btn-medium {
+        background: linear-gradient(45deg, #f39c12, #e67e22);
+    }
+    .btn-medium:hover {
+        box-shadow: 0 0 20px #f39c12;
+        transform: scale(1.05);
+    }
+
+    /* 3. Hard - Neon Red */
+    .btn-hard {
+        background: linear-gradient(45deg, #e74c3c, #c0392b);
+    }
+    .btn-hard:hover {
+        box-shadow: 0 0 20px #e74c3c;
+        transform: scale(1.05);
+    }
+
+    /* Floating Animation */
+    @keyframes float {
+        0% { transform: translateY(0px); }
+        50% { transform: translateY(-10px); }
+        100% { transform: translateY(0px); }
+    }
+
+</style>
+</head>
+
+<body>
+
+<div class="card">
+    <h2>Select Mode</h2>
+
+    <button class="btn btn-easy" onclick="go('easy.html')">
+        Easy
+    </button>
+
+    <button class="btn btn-medium" onclick="go('medium.html')">
+        Medium
+    </button>
+
+    <button class="btn btn-hard" onclick="go('hard.html')">
+        Hard
+    </button>
+</div>
+
+<script>
+    function go(page){
+        // Add a small delay for animation
+        setTimeout(() => {
+            window.location.href = page;
+        }, 200);
+    }
+</script>
+
+</body>
+</html>
