@@ -1,45 +1,84 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Online Room</title>
+<meta charset="UTF-8">
+<title>Online Tic Tac Toe</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <style>
 body{
-font-family:Arial;
-background:#0f172a;
-color:white;
-display:flex;
-justify-content:center;
-align-items:center;
-height:100vh;
+  margin:0;
+  font-family:Arial, sans-serif;
+  background:#0f172a;
+  color:#fff;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  height:100vh;
 }
-.box{
-background:#1e293b;
-padding:20px;
-border-radius:10px;
-width:300px;
-text-align:center;
+.container{
+  background:#1e293b;
+  padding:20px;
+  border-radius:12px;
+  width:320px;
+  text-align:center;
 }
 input,button{
-width:100%;
-padding:10px;
-margin:8px 0;
-font-size:16px;
+  width:100%;
+  padding:10px;
+  margin:8px 0;
+  font-size:16px;
 }
 button{cursor:pointer}
+.board{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:5px;
+  margin-top:15px;
+}
+.cell{
+  height:80px;
+  background:#334155;
+  font-size:36px;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  cursor:pointer;
+}
+.hidden{display:none}
 </style>
 </head>
 
 <body>
-<div class="box">
-<h2>Online Room</h2>
 
-<button onclick="createRoom()">Create Room</button>
+<div class="container">
 
-<input id="roomId" placeholder="Enter Room Code">
-<button onclick="joinRoom()">Join Room</button>
+<h2>Online Tic Tac Toe</h2>
 
-<p id="msg"></p>
+<div id="roomUI">
+  <button onclick="createRoom()">Create Room</button>
+  <input id="roomInput" placeholder="Enter Room Code">
+  <button onclick="joinRoom()">Join Room</button>
+  <p id="msg"></p>
+</div>
+
+<div id="gameUI" class="hidden">
+  <p id="playerInfo"></p>
+  <p id="turnInfo"></p>
+
+  <div class="board" id="board">
+    <div class="cell" onclick="move(0)"></div>
+    <div class="cell" onclick="move(1)"></div>
+    <div class="cell" onclick="move(2)"></div>
+    <div class="cell" onclick="move(3)"></div>
+    <div class="cell" onclick="move(4)"></div>
+    <div class="cell" onclick="move(5)"></div>
+    <div class="cell" onclick="move(6 hookup)"></div>
+    <div class="cell" onclick="move(7)"></div>
+    <div class="cell" onclick="move(8)"></div>
+  </div>
+</div>
+
 </div>
 
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
@@ -53,35 +92,95 @@ const firebaseConfig = {
   projectId: "tic-tac-toe-online-8af06",
   storageBucket: "tic-tac-toe-online-8af06.firebasestorage.app",
   messagingSenderId: "539479661784",
-  appId: "1:539479661784:web:078147d1569fbd93280bad",
-  measurementId: "G-LWHZ9B013C"
+  appId: "1:539479661784:web:078147d1569fbd93280bad"
 };
 
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
-let room = "";
+let room="", player="", myTurn=false;
 
 function createRoom(){
   room = Math.random().toString(36).substring(2,7);
+  player = "X";
+
   db.ref("rooms/"+room).set({
     board:["","","","","","","","",""],
-    turn:"X"
+    turn:"X",
+    status:"playing"
   });
-  document.getElementById("msg").innerText =
-    "Room Created: " + room + " (Share this code)";
+
+  startGame();
+  document.getElementById("msg").innerText = "Room: "+room;
 }
 
 function joinRoom(){
-  room = document.getElementById("roomId").value;
+  room = document.getElementById("roomInput").value;
   db.ref("rooms/"+room).once("value", snap=>{
-    if(snap.exists()){
-      alert("Joined Room: " + room);
-    }else{
+    if(!snap.exists()){
       alert("Room not found");
+      return;
+    }
+    player = "O";
+    startGame();
+  });
+}
+
+function startGame(){
+  document.getElementById("roomUI").classList.add("hidden");
+  document.getElementById("gameUI").classList.remove("hidden");
+  document.getElementById("playerInfo").innerText = "You are: "+player;
+
+  db.ref("rooms/"+room).on("value", snap=>{
+    const data = snap.val();
+    if(!data) return;
+
+    updateBoard(data.board);
+    document.getElementById("turnInfo").innerText = "Turn: "+data.turn;
+    myTurn = (data.turn === player);
+
+    const win = checkWinner(data.board);
+    if(win){
+      alert(win==="draw" ? "Draw!" : win+" Wins!");
+      db.ref("rooms/"+room).off();
     }
   });
 }
+
+function move(i){
+  if(!myTurn) return;
+
+  db.ref("rooms/"+room).once("value", snap=>{
+    const data = snap.val();
+    if(data.board[i] !== "") return;
+
+    data.board[i] = player;
+    data.turn = (player==="X") ? "O" : "X";
+
+    db.ref("rooms/"+room).set(data);
+  });
+}
+
+function updateBoard(b){
+  document.querySelectorAll(".cell").forEach((c,i)=>{
+    c.innerText = b[i];
+  });
+}
+
+function checkWinner(b){
+  const w = [
+    [0,1,2],[3,4,5],[6,7,8],
+    [0,3,6],[1,4,7],[2,5,8],
+    [0,4,8],[2,4,6]
+  ];
+  for(let a of w){
+    if(b[a[0]] && b[a[0]]===b[a[1]] && b[a[1]]===b[a[2]])
+      return b[a[0]];
+  }
+  if(b.every(x=>x)) return "draw";
+  return null;
+}
 </script>
+
 </body>
 </html>
