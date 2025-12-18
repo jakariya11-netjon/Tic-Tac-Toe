@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Pro Tic Tac Toe Online + Chat</title>
+    <title>Pro Tic Tac Toe Online + Chat Menu</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
         body { 
@@ -18,9 +18,10 @@
             background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px);
             padding: 25px; border-radius: 20px; width: 340px; text-align: center; 
             box-shadow: 0 20px 50px rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.1);
+            position: relative;
         }
 
-        h2 { margin-top: 0; color: #60a5fa; }
+        h2 { margin-top: 0; color: #60a5fa; text-shadow: 0 0 10px rgba(96, 165, 250, 0.3); }
         input, button { width:100%; padding:12px; margin:8px 0; border-radius: 10px; border:none; font-size:15px; box-sizing: border-box; transition: 0.3s; }
         input { background: #334155; color: white; border: 1px solid #475569; }
         button { background: #3b82f6; color: white; font-weight: bold; cursor:pointer; }
@@ -32,9 +33,17 @@
             display:flex; justify-content:center; align-items:center; cursor:pointer; border-radius: 12px; font-weight: bold;
         }
 
-        /* Chat Styles */
-        .chat-box { margin-top: 15px; display: flex; flex-wrap: wrap; gap: 5px; justify-content: center; }
-        .chat-btn { width: auto; padding: 6px 10px; font-size: 12px; background: #475569; margin: 0; }
+        /* Chat Menu Styles */
+        #chat-trigger { background: #475569; margin-top: 20px; font-size: 14px; }
+        .chat-menu { 
+            background: rgba(15, 23, 42, 0.95);
+            position: absolute; bottom: 80px; left: 50%; transform: translateX(-50%);
+            width: 80%; padding: 15px; border-radius: 15px; border: 1px solid #3b82f6;
+            display: none; flex-direction: column; gap: 8px; z-index: 10;
+        }
+        .chat-btn { padding: 10px; background: #1e293b; border: 1px solid #334155; border-radius: 8px; color: white; cursor: pointer; }
+        .chat-btn:hover { background: #3b82f6; }
+
         #msg-popup { 
             position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
             background: #10b981; padding: 10px 20px; border-radius: 30px; 
@@ -44,7 +53,6 @@
         @keyframes slideDown { from { top: -50px; } to { top: 20px; } }
 
         .hidden { display:none; }
-        #turnInfo { font-size: 18px; color: #94a3b8; margin-bottom: 5px; }
         .x-mark { color: #60a5fa; }
         .o-mark { color: #f87171; }
     </style>
@@ -65,8 +73,8 @@
 
     <div id="gameUI" class="hidden">
         <div id="roomDisplay" style="color:#10b981; font-weight:bold; letter-spacing:2px;"></div>
-        <p id="playerInfo" style="margin: 5px 0; font-size:14px;"></p>
-        <p id="turnInfo">Waiting...</p>
+        <p id="playerInfo" style="margin: 5px 0; font-size:14px; opacity: 0.7;"></p>
+        <p id="turnInfo" style="font-size: 18px; font-weight: bold;">Waiting...</p>
 
         <div class="board">
             <div class="cell" onclick="move(0)"></div>
@@ -80,11 +88,13 @@
             <div class="cell" onclick="move(8)"></div>
         </div>
 
-        <div class="chat-box">
-            <button class="chat-btn" onclick="sendChat('Hello! 👋')">Hello!</button>
-            <button class="chat-btn" onclick="sendChat('Nice move! 🔥')">Nice move!</button>
-            <button class="chat-btn" onclick="sendChat('Your turn! ⏳')">Your turn!</button>
-            <button class="chat-btn" onclick="sendChat('Good Game! 🤝')">GG!</button>
+        <button id="chat-trigger" onclick="toggleChat()">MESSAGE 💬</button>
+        <div id="chatMenu" class="chat-menu">
+            <div class="chat-btn" onclick="sendChat('Hello! 👋')">Hello! 👋</div>
+            <div class="chat-btn" onclick="sendChat('Nice move! 🔥')">Nice move! 🔥</div>
+            <div class="chat-btn" onclick="sendChat('Your turn! ⏳')">Your turn! ⏳</div>
+            <div class="chat-btn" onclick="sendChat('I will win! 😎')">I will win! 😎</div>
+            <div class="chat-btn" onclick="sendChat('Good Game! 🤝')">Good Game! 🤝</div>
         </div>
     </div>
 </div>
@@ -122,6 +132,20 @@ function playSound(id) {
     if(s) { s.currentTime = 0; s.play().catch(() => {}); }
 }
 
+function toggleChat() {
+    const menu = document.getElementById("chatMenu");
+    menu.style.display = (menu.style.display === "flex") ? "none" : "flex";
+}
+
+function sendChat(text) {
+    db.ref("rooms/" + roomCode + "/chat").set({
+        msg: text,
+        sender: playerSign,
+        time: firebase.database.ServerValue.TIMESTAMP
+    });
+    toggleChat(); // Close menu after sending
+}
+
 function createRoom() {
     roomCode = Math.random().toString(36).substring(2, 7).toUpperCase();
     playerSign = "X";
@@ -155,35 +179,25 @@ function showGameUI() {
     listenForUpdates();
 }
 
-function sendChat(text) {
-    db.ref("rooms/" + roomCode + "/chat").set({
-        msg: text,
-        sender: playerSign,
-        time: Date.now()
-    });
-}
-
 function listenForUpdates() {
     db.ref("rooms/" + roomCode).on("value", snap => {
         const data = snap.val();
         if (!data) return;
 
-        // Update Board
         const cells = document.querySelectorAll(".cell");
         data.board.forEach((val, i) => {
             cells[i].innerText = val;
             cells[i].className = val === "X" ? "cell x-mark" : val === "O" ? "cell o-mark" : "cell";
         });
 
-        // Update Turn Info
         if (data.status === "playing") {
             gameActive = true;
             document.getElementById("turnInfo").innerText = (data.turn === playerSign) ? "YOUR TURN" : "FRIEND'S TURN...";
             document.getElementById("turnInfo").style.color = (data.turn === playerSign) ? "#10b981" : "#94a3b8";
         }
 
-        // Handle Chat Messages
-        if (data.chat && data.chat.sender !== playerSign && data.chat.time > (Date.now() - 2000)) {
+        // Message Listener
+        if (data.chat && data.chat.sender !== playerSign && data.chat.time > (Date.now() - 3000)) {
             showPopup(data.chat.sender + ": " + data.chat.msg);
         }
 
