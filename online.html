@@ -2,88 +2,71 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Pro Tic Tac Toe Online</title>
+    <title>Pro Tic Tac Toe Online + Chat</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
-        /* Animated Gaming Background */
         body { 
-            margin:0; 
-            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            margin:0; font-family: 'Segoe UI', sans-serif;
             background: linear-gradient(-45deg, #0f172a, #1e1b4b, #312e81, #1e293b);
             background-size: 400% 400%;
             animation: gradient 15s ease infinite;
-            color:#fff; 
-            display:flex; 
-            justify-content:center; 
-            align-items:center; 
-            height:100vh; 
-            overflow: hidden;
+            color:#fff; display:flex; justify-content:center; align-items:center; height:100vh; overflow: hidden;
         }
-
-        @keyframes gradient {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
+        @keyframes gradient { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
 
         .container { 
-            background: rgba(30, 41, 59, 0.7);
-            backdrop-filter: blur(12px);
-            padding: 30px; 
-            border-radius: 20px; 
-            width: 340px; 
-            text-align: center; 
-            box-shadow: 0 20px 50px rgba(0,0,0,0.4);
-            border: 1px solid rgba(255,255,255,0.1);
+            background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px);
+            padding: 25px; border-radius: 20px; width: 340px; text-align: center; 
+            box-shadow: 0 20px 50px rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.1);
         }
 
-        h2 { margin-top: 0; letter-spacing: 1px; color: #60a5fa; }
+        h2 { margin-top: 0; color: #60a5fa; }
+        input, button { width:100%; padding:12px; margin:8px 0; border-radius: 10px; border:none; font-size:15px; box-sizing: border-box; transition: 0.3s; }
+        input { background: #334155; color: white; border: 1px solid #475569; }
+        button { background: #3b82f6; color: white; font-weight: bold; cursor:pointer; }
+        button:hover { background: #2563eb; transform: translateY(-2px); }
 
-        input, button { 
-            width:100%; padding:14px; margin:10px 0; border-radius: 10px; 
-            border:none; font-size:16px; box-sizing: border-box; transition: 0.3s;
-        }
-
-        input { background: #334155; color: white; outline: none; border: 1px solid #475569; }
-        input:focus { border-color: #3b82f6; }
-
-        button { background: #3b82f6; color: white; font-weight: bold; cursor:pointer; text-transform: uppercase; }
-        button:hover { background: #2563eb; transform: translateY(-2px); box-shadow: 0 5px 15px rgba(59, 130, 246, 0.4); }
-
-        .board { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-top:20px; }
+        .board { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-top:15px; }
         .cell { 
-            height:90px; background: rgba(51, 65, 85, 0.6); font-size:42px; 
-            display:flex; justify-content:center; align-items:center; 
-            cursor:pointer; border-radius: 12px; transition: 0.2s;
-            border: 1px solid rgba(255,255,255,0.05);
-            font-weight: bold;
+            height:85px; background: rgba(51, 65, 85, 0.6); font-size:40px; 
+            display:flex; justify-content:center; align-items:center; cursor:pointer; border-radius: 12px; font-weight: bold;
         }
-        .cell:hover { background: rgba(71, 85, 105, 0.8); }
+
+        /* Chat Styles */
+        .chat-box { margin-top: 15px; display: flex; flex-wrap: wrap; gap: 5px; justify-content: center; }
+        .chat-btn { width: auto; padding: 6px 10px; font-size: 12px; background: #475569; margin: 0; }
+        #msg-popup { 
+            position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
+            background: #10b981; padding: 10px 20px; border-radius: 30px; 
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3); font-weight: bold; z-index: 100;
+            display: none; animation: slideDown 0.3s ease;
+        }
+        @keyframes slideDown { from { top: -50px; } to { top: 20px; } }
 
         .hidden { display:none; }
-        #roomDisplay { font-weight: bold; color: #10b981; font-size: 22px; letter-spacing: 3px; margin: 5px 0; }
-        #turnInfo { font-size: 18px; color: #94a3b8; margin-bottom: 10px; }
-        
-        .x-mark { color: #60a5fa; text-shadow: 0 0 15px rgba(96, 165, 250, 0.6); }
-        .o-mark { color: #f87171; text-shadow: 0 0 15px rgba(248, 113, 113, 0.6); }
+        #turnInfo { font-size: 18px; color: #94a3b8; margin-bottom: 5px; }
+        .x-mark { color: #60a5fa; }
+        .o-mark { color: #f87171; }
     </style>
 </head>
 <body>
+
+<div id="msg-popup"></div>
 
 <div class="container">
     <h2>TIC TAC TOE</h2>
 
     <div id="roomUI">
         <button onclick="createRoom()">Create New Game</button>
-        <div style="margin: 15px 0; color: #94a3b8; font-size: 14px;">— OR —</div>
+        <div style="color: #94a3b8; font-size: 12px;">— OR —</div>
         <input id="roomInput" placeholder="Enter 5-digit code">
         <button style="background: #10b981;" onclick="joinRoom()">Join Game</button>
     </div>
 
     <div id="gameUI" class="hidden">
-        <div id="roomDisplay"></div>
-        <p id="playerInfo" style="margin: 5px 0; opacity: 0.8;"></p>
-        <p id="turnInfo">Waiting for opponent...</p>
+        <div id="roomDisplay" style="color:#10b981; font-weight:bold; letter-spacing:2px;"></div>
+        <p id="playerInfo" style="margin: 5px 0; font-size:14px;"></p>
+        <p id="turnInfo">Waiting...</p>
 
         <div class="board">
             <div class="cell" onclick="move(0)"></div>
@@ -96,6 +79,13 @@
             <div class="cell" onclick="move(7)"></div>
             <div class="cell" onclick="move(8)"></div>
         </div>
+
+        <div class="chat-box">
+            <button class="chat-btn" onclick="sendChat('Hello! 👋')">Hello!</button>
+            <button class="chat-btn" onclick="sendChat('Nice move! 🔥')">Nice move!</button>
+            <button class="chat-btn" onclick="sendChat('Your turn! ⏳')">Your turn!</button>
+            <button class="chat-btn" onclick="sendChat('Good Game! 🤝')">GG!</button>
+        </div>
     </div>
 </div>
 
@@ -103,6 +93,7 @@
 <audio id="sound-win" src="https://raw.githubusercontent.com/jakariya11-netjon/Tic-Tac-Toe/main/loud-fanfare-trumpet-effect-05-412046.mp3"></audio>
 <audio id="sound-loss" src="https://raw.githubusercontent.com/jakariya11-netjon/Tic-Tac-Toe/main/loss.mp3"></audio>
 <audio id="sound-draw" src="https://raw.githubusercontent.com/jakariya11-netjon/Tic-Tac-Toe/main/tie.mp3"></audio>
+<audio id="sound-msg" src="https://assets.mixkit.co/active_storage/sfx/2354/2354-preview.mp3"></audio>
 
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
@@ -128,10 +119,7 @@ let isResetting = false;
 
 function playSound(id) {
     const s = document.getElementById(id);
-    if(s) {
-        s.currentTime = 0;
-        s.play().catch(e => console.log("Interaction needed for sound"));
-    }
+    if(s) { s.currentTime = 0; s.play().catch(() => {}); }
 }
 
 function createRoom() {
@@ -140,8 +128,9 @@ function createRoom() {
     db.ref("rooms/" + roomCode).set({
         board: ["", "", "", "", "", "", "", "", ""],
         turn: "X",
-        startingPlayer: "X", // Keep track of who started
-        status: "waiting"
+        startingPlayer: "X",
+        status: "waiting",
+        chat: { msg: "", sender: "", time: 0 }
     });
     showGameUI();
 }
@@ -161,9 +150,17 @@ function joinRoom() {
 function showGameUI() {
     document.getElementById("roomUI").classList.add("hidden");
     document.getElementById("gameUI").classList.remove("hidden");
-    document.getElementById("roomDisplay").innerText = roomCode;
-    document.getElementById("playerInfo").innerText = "You are: " + playerSign;
+    document.getElementById("roomDisplay").innerText = "ROOM: " + roomCode;
+    document.getElementById("playerInfo").innerText = "YOU ARE: " + playerSign;
     listenForUpdates();
+}
+
+function sendChat(text) {
+    db.ref("rooms/" + roomCode + "/chat").set({
+        msg: text,
+        sender: playerSign,
+        time: Date.now()
+    });
 }
 
 function listenForUpdates() {
@@ -171,26 +168,36 @@ function listenForUpdates() {
         const data = snap.val();
         if (!data) return;
 
+        // Update Board
         const cells = document.querySelectorAll(".cell");
         data.board.forEach((val, i) => {
             cells[i].innerText = val;
             cells[i].className = val === "X" ? "cell x-mark" : val === "O" ? "cell o-mark" : "cell";
         });
 
-        if (data.status === "waiting") {
-            document.getElementById("turnInfo").innerText = "Waiting for friend...";
-            gameActive = false;
-        } else if (data.status === "playing") {
+        // Update Turn Info
+        if (data.status === "playing") {
             gameActive = true;
             document.getElementById("turnInfo").innerText = (data.turn === playerSign) ? "YOUR TURN" : "FRIEND'S TURN...";
             document.getElementById("turnInfo").style.color = (data.turn === playerSign) ? "#10b981" : "#94a3b8";
         }
 
-        const winner = checkWinner(data.board);
-        if (winner && !isResetting) {
-            handleGameOver(winner, data.startingPlayer);
+        // Handle Chat Messages
+        if (data.chat && data.chat.sender !== playerSign && data.chat.time > (Date.now() - 2000)) {
+            showPopup(data.chat.sender + ": " + data.chat.msg);
         }
+
+        const winner = checkWinner(data.board);
+        if (winner && !isResetting) handleGameOver(winner, data.startingPlayer);
     });
+}
+
+function showPopup(text) {
+    const p = document.getElementById("msg-popup");
+    p.innerText = text;
+    p.style.display = "block";
+    playSound('sound-msg');
+    setTimeout(() => { p.style.display = "none"; }, 3000);
 }
 
 function move(index) {
@@ -221,17 +228,15 @@ function handleGameOver(winner, lastStarter) {
         document.getElementById("turnInfo").innerText = "YOU LOST... 💀";
     }
 
-    // Determine next starter (Switch between X and O)
     const nextStarter = (lastStarter === "X") ? "O" : "X";
-
     setTimeout(() => {
-        // Only X (the creator) manages the database reset to prevent conflicts
         if (playerSign === "X") {
             db.ref("rooms/" + roomCode).update({
                 board: ["", "", "", "", "", "", "", "", ""],
                 turn: nextStarter,
                 startingPlayer: nextStarter,
-                status: "playing"
+                status: "playing",
+                chat: { msg: "", sender: "", time: 0 }
             });
         }
         isResetting = false;
@@ -241,11 +246,771 @@ function handleGameOver(winner, lastStarter) {
 function checkWinner(b) {
     const wins = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
     for (let combo of wins) {
-        if (b[combo[0]] && b[combo[0]] === b[combo[1]] && b[combo[1]] === b[combo[2]]) 
-            return b[combo[0]];
+        if (b[combo[0]] && b[combo[0]] === b[combo[1]] && b[combo[1]] === b[combo[2]]) return b[combo[0]];
     }
-    if (b.every(cell => cell !== "")) return "draw";
-    return null;
+    return b.every(cell => cell !== "") ? "draw" : null;
+}
+</script>
+</body>
+</html><!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Pro Tic Tac Toe Online + Chat</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body { 
+            margin:0; font-family: 'Segoe UI', sans-serif;
+            background: linear-gradient(-45deg, #0f172a, #1e1b4b, #312e81, #1e293b);
+            background-size: 400% 400%;
+            animation: gradient 15s ease infinite;
+            color:#fff; display:flex; justify-content:center; align-items:center; height:100vh; overflow: hidden;
+        }
+        @keyframes gradient { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+
+        .container { 
+            background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px);
+            padding: 25px; border-radius: 20px; width: 340px; text-align: center; 
+            box-shadow: 0 20px 50px rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        h2 { margin-top: 0; color: #60a5fa; }
+        input, button { width:100%; padding:12px; margin:8px 0; border-radius: 10px; border:none; font-size:15px; box-sizing: border-box; transition: 0.3s; }
+        input { background: #334155; color: white; border: 1px solid #475569; }
+        button { background: #3b82f6; color: white; font-weight: bold; cursor:pointer; }
+        button:hover { background: #2563eb; transform: translateY(-2px); }
+
+        .board { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-top:15px; }
+        .cell { 
+            height:85px; background: rgba(51, 65, 85, 0.6); font-size:40px; 
+            display:flex; justify-content:center; align-items:center; cursor:pointer; border-radius: 12px; font-weight: bold;
+        }
+
+        /* Chat Styles */
+        .chat-box { margin-top: 15px; display: flex; flex-wrap: wrap; gap: 5px; justify-content: center; }
+        .chat-btn { width: auto; padding: 6px 10px; font-size: 12px; background: #475569; margin: 0; }
+        #msg-popup { 
+            position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
+            background: #10b981; padding: 10px 20px; border-radius: 30px; 
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3); font-weight: bold; z-index: 100;
+            display: none; animation: slideDown 0.3s ease;
+        }
+        @keyframes slideDown { from { top: -50px; } to { top: 20px; } }
+
+        .hidden { display:none; }
+        #turnInfo { font-size: 18px; color: #94a3b8; margin-bottom: 5px; }
+        .x-mark { color: #60a5fa; }
+        .o-mark { color: #f87171; }
+    </style>
+</head>
+<body>
+
+<div id="msg-popup"></div>
+
+<div class="container">
+    <h2>TIC TAC TOE</h2>
+
+    <div id="roomUI">
+        <button onclick="createRoom()">Create New Game</button>
+        <div style="color: #94a3b8; font-size: 12px;">— OR —</div>
+        <input id="roomInput" placeholder="Enter 5-digit code">
+        <button style="background: #10b981;" onclick="joinRoom()">Join Game</button>
+    </div>
+
+    <div id="gameUI" class="hidden">
+        <div id="roomDisplay" style="color:#10b981; font-weight:bold; letter-spacing:2px;"></div>
+        <p id="playerInfo" style="margin: 5px 0; font-size:14px;"></p>
+        <p id="turnInfo">Waiting...</p>
+
+        <div class="board">
+            <div class="cell" onclick="move(0)"></div>
+            <div class="cell" onclick="move(1)"></div>
+            <div class="cell" onclick="move(2)"></div>
+            <div class="cell" onclick="move(3)"></div>
+            <div class="cell" onclick="move(4)"></div>
+            <div class="cell" onclick="move(5)"></div>
+            <div class="cell" onclick="move(6)"></div>
+            <div class="cell" onclick="move(7)"></div>
+            <div class="cell" onclick="move(8)"></div>
+        </div>
+
+        <div class="chat-box">
+            <button class="chat-btn" onclick="sendChat('Hello! 👋')">Hello!</button>
+            <button class="chat-btn" onclick="sendChat('Nice move! 🔥')">Nice move!</button>
+            <button class="chat-btn" onclick="sendChat('Your turn! ⏳')">Your turn!</button>
+            <button class="chat-btn" onclick="sendChat('Good Game! 🤝')">GG!</button>
+        </div>
+    </div>
+</div>
+
+<audio id="sound-tap" src="https://raw.githubusercontent.com/jakariya11-netjon/Tic-Tac-Toe/main/pop-402322.mp3"></audio>
+<audio id="sound-win" src="https://raw.githubusercontent.com/jakariya11-netjon/Tic-Tac-Toe/main/loud-fanfare-trumpet-effect-05-412046.mp3"></audio>
+<audio id="sound-loss" src="https://raw.githubusercontent.com/jakariya11-netjon/Tic-Tac-Toe/main/loss.mp3"></audio>
+<audio id="sound-draw" src="https://raw.githubusercontent.com/jakariya11-netjon/Tic-Tac-Toe/main/tie.mp3"></audio>
+<audio id="sound-msg" src="https://assets.mixkit.co/active_storage/sfx/2354/2354-preview.mp3"></audio>
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
+<script>
+const firebaseConfig = {
+    apiKey: "AIzaSyB78J0GqZUvjmAmUsmHCTLO3vIqhQq1N8",
+    authDomain: "tic-tac-toe-online-8af06.firebaseapp.com",
+    databaseURL: "https://tic-tac-toe-online-8af06-default-rtdb.firebaseio.com",
+    projectId: "tic-tac-toe-online-8af06",
+    storageBucket: "tic-tac-toe-online-8af06.firebasestorage.app",
+    messagingSenderId: "539479661784",
+    appId: "1:539479661784:web:078147d1569fbd93280bad"
+};
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+
+let roomCode = "";
+let playerSign = "";
+let gameActive = false;
+let isResetting = false;
+
+function playSound(id) {
+    const s = document.getElementById(id);
+    if(s) { s.currentTime = 0; s.play().catch(() => {}); }
+}
+
+function createRoom() {
+    roomCode = Math.random().toString(36).substring(2, 7).toUpperCase();
+    playerSign = "X";
+    db.ref("rooms/" + roomCode).set({
+        board: ["", "", "", "", "", "", "", "", ""],
+        turn: "X",
+        startingPlayer: "X",
+        status: "waiting",
+        chat: { msg: "", sender: "", time: 0 }
+    });
+    showGameUI();
+}
+
+function joinRoom() {
+    const input = document.getElementById("roomInput").value.trim().toUpperCase();
+    if (!input) return;
+    db.ref("rooms/" + input).once("value", snap => {
+        if (!snap.exists()) return alert("Room not found!");
+        roomCode = input;
+        playerSign = "O";
+        db.ref("rooms/" + roomCode).update({ status: "playing" });
+        showGameUI();
+    });
+}
+
+function showGameUI() {
+    document.getElementById("roomUI").classList.add("hidden");
+    document.getElementById("gameUI").classList.remove("hidden");
+    document.getElementById("roomDisplay").innerText = "ROOM: " + roomCode;
+    document.getElementById("playerInfo").innerText = "YOU ARE: " + playerSign;
+    listenForUpdates();
+}
+
+function sendChat(text) {
+    db.ref("rooms/" + roomCode + "/chat").set({
+        msg: text,
+        sender: playerSign,
+        time: Date.now()
+    });
+}
+
+function listenForUpdates() {
+    db.ref("rooms/" + roomCode).on("value", snap => {
+        const data = snap.val();
+        if (!data) return;
+
+        // Update Board
+        const cells = document.querySelectorAll(".cell");
+        data.board.forEach((val, i) => {
+            cells[i].innerText = val;
+            cells[i].className = val === "X" ? "cell x-mark" : val === "O" ? "cell o-mark" : "cell";
+        });
+
+        // Update Turn Info
+        if (data.status === "playing") {
+            gameActive = true;
+            document.getElementById("turnInfo").innerText = (data.turn === playerSign) ? "YOUR TURN" : "FRIEND'S TURN...";
+            document.getElementById("turnInfo").style.color = (data.turn === playerSign) ? "#10b981" : "#94a3b8";
+        }
+
+        // Handle Chat Messages
+        if (data.chat && data.chat.sender !== playerSign && data.chat.time > (Date.now() - 2000)) {
+            showPopup(data.chat.sender + ": " + data.chat.msg);
+        }
+
+        const winner = checkWinner(data.board);
+        if (winner && !isResetting) handleGameOver(winner, data.startingPlayer);
+    });
+}
+
+function showPopup(text) {
+    const p = document.getElementById("msg-popup");
+    p.innerText = text;
+    p.style.display = "block";
+    playSound('sound-msg');
+    setTimeout(() => { p.style.display = "none"; }, 3000);
+}
+
+function move(index) {
+    if (!gameActive) return;
+    db.ref("rooms/" + roomCode).once("value", snap => {
+        const data = snap.val();
+        if (data.turn === playerSign && data.board[index] === "" && data.status === "playing") {
+            playSound('sound-tap');
+            data.board[index] = playerSign;
+            data.turn = (playerSign === "X") ? "O" : "X";
+            db.ref("rooms/" + roomCode).update(data);
+        }
+    });
+}
+
+function handleGameOver(winner, lastStarter) {
+    gameActive = false;
+    isResetting = true;
+
+    if (winner === "draw") {
+        playSound('sound-draw');
+        document.getElementById("turnInfo").innerText = "IT'S A TIE!";
+    } else if (winner === playerSign) {
+        playSound('sound-win');
+        document.getElementById("turnInfo").innerText = "YOU WIN! 🎉";
+    } else {
+        playSound('sound-loss');
+        document.getElementById("turnInfo").innerText = "YOU LOST... 💀";
+    }
+
+    const nextStarter = (lastStarter === "X") ? "O" : "X";
+    setTimeout(() => {
+        if (playerSign === "X") {
+            db.ref("rooms/" + roomCode).update({
+                board: ["", "", "", "", "", "", "", "", ""],
+                turn: nextStarter,
+                startingPlayer: nextStarter,
+                status: "playing",
+                chat: { msg: "", sender: "", time: 0 }
+            });
+        }
+        isResetting = false;
+    }, 3000);
+}
+
+function checkWinner(b) {
+    const wins = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
+    for (let combo of wins) {
+        if (b[combo[0]] && b[combo[0]] === b[combo[1]] && b[combo[1]] === b[combo[2]]) return b[combo[0]];
+    }
+    return b.every(cell => cell !== "") ? "draw" : null;
+}
+</script>
+</body>
+</html><!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Pro Tic Tac Toe Online + Chat</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body { 
+            margin:0; font-family: 'Segoe UI', sans-serif;
+            background: linear-gradient(-45deg, #0f172a, #1e1b4b, #312e81, #1e293b);
+            background-size: 400% 400%;
+            animation: gradient 15s ease infinite;
+            color:#fff; display:flex; justify-content:center; align-items:center; height:100vh; overflow: hidden;
+        }
+        @keyframes gradient { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+
+        .container { 
+            background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px);
+            padding: 25px; border-radius: 20px; width: 340px; text-align: center; 
+            box-shadow: 0 20px 50px rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        h2 { margin-top: 0; color: #60a5fa; }
+        input, button { width:100%; padding:12px; margin:8px 0; border-radius: 10px; border:none; font-size:15px; box-sizing: border-box; transition: 0.3s; }
+        input { background: #334155; color: white; border: 1px solid #475569; }
+        button { background: #3b82f6; color: white; font-weight: bold; cursor:pointer; }
+        button:hover { background: #2563eb; transform: translateY(-2px); }
+
+        .board { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-top:15px; }
+        .cell { 
+            height:85px; background: rgba(51, 65, 85, 0.6); font-size:40px; 
+            display:flex; justify-content:center; align-items:center; cursor:pointer; border-radius: 12px; font-weight: bold;
+        }
+
+        /* Chat Styles */
+        .chat-box { margin-top: 15px; display: flex; flex-wrap: wrap; gap: 5px; justify-content: center; }
+        .chat-btn { width: auto; padding: 6px 10px; font-size: 12px; background: #475569; margin: 0; }
+        #msg-popup { 
+            position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
+            background: #10b981; padding: 10px 20px; border-radius: 30px; 
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3); font-weight: bold; z-index: 100;
+            display: none; animation: slideDown 0.3s ease;
+        }
+        @keyframes slideDown { from { top: -50px; } to { top: 20px; } }
+
+        .hidden { display:none; }
+        #turnInfo { font-size: 18px; color: #94a3b8; margin-bottom: 5px; }
+        .x-mark { color: #60a5fa; }
+        .o-mark { color: #f87171; }
+    </style>
+</head>
+<body>
+
+<div id="msg-popup"></div>
+
+<div class="container">
+    <h2>TIC TAC TOE</h2>
+
+    <div id="roomUI">
+        <button onclick="createRoom()">Create New Game</button>
+        <div style="color: #94a3b8; font-size: 12px;">— OR —</div>
+        <input id="roomInput" placeholder="Enter 5-digit code">
+        <button style="background: #10b981;" onclick="joinRoom()">Join Game</button>
+    </div>
+
+    <div id="gameUI" class="hidden">
+        <div id="roomDisplay" style="color:#10b981; font-weight:bold; letter-spacing:2px;"></div>
+        <p id="playerInfo" style="margin: 5px 0; font-size:14px;"></p>
+        <p id="turnInfo">Waiting...</p>
+
+        <div class="board">
+            <div class="cell" onclick="move(0)"></div>
+            <div class="cell" onclick="move(1)"></div>
+            <div class="cell" onclick="move(2)"></div>
+            <div class="cell" onclick="move(3)"></div>
+            <div class="cell" onclick="move(4)"></div>
+            <div class="cell" onclick="move(5)"></div>
+            <div class="cell" onclick="move(6)"></div>
+            <div class="cell" onclick="move(7)"></div>
+            <div class="cell" onclick="move(8)"></div>
+        </div>
+
+        <div class="chat-box">
+            <button class="chat-btn" onclick="sendChat('Hello! 👋')">Hello!</button>
+            <button class="chat-btn" onclick="sendChat('Nice move! 🔥')">Nice move!</button>
+            <button class="chat-btn" onclick="sendChat('Your turn! ⏳')">Your turn!</button>
+            <button class="chat-btn" onclick="sendChat('Good Game! 🤝')">GG!</button>
+        </div>
+    </div>
+</div>
+
+<audio id="sound-tap" src="https://raw.githubusercontent.com/jakariya11-netjon/Tic-Tac-Toe/main/pop-402322.mp3"></audio>
+<audio id="sound-win" src="https://raw.githubusercontent.com/jakariya11-netjon/Tic-Tac-Toe/main/loud-fanfare-trumpet-effect-05-412046.mp3"></audio>
+<audio id="sound-loss" src="https://raw.githubusercontent.com/jakariya11-netjon/Tic-Tac-Toe/main/loss.mp3"></audio>
+<audio id="sound-draw" src="https://raw.githubusercontent.com/jakariya11-netjon/Tic-Tac-Toe/main/tie.mp3"></audio>
+<audio id="sound-msg" src="https://assets.mixkit.co/active_storage/sfx/2354/2354-preview.mp3"></audio>
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
+<script>
+const firebaseConfig = {
+    apiKey: "AIzaSyB78J0GqZUvjmAmUsmHCTLO3vIqhQq1N8",
+    authDomain: "tic-tac-toe-online-8af06.firebaseapp.com",
+    databaseURL: "https://tic-tac-toe-online-8af06-default-rtdb.firebaseio.com",
+    projectId: "tic-tac-toe-online-8af06",
+    storageBucket: "tic-tac-toe-online-8af06.firebasestorage.app",
+    messagingSenderId: "539479661784",
+    appId: "1:539479661784:web:078147d1569fbd93280bad"
+};
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+
+let roomCode = "";
+let playerSign = "";
+let gameActive = false;
+let isResetting = false;
+
+function playSound(id) {
+    const s = document.getElementById(id);
+    if(s) { s.currentTime = 0; s.play().catch(() => {}); }
+}
+
+function createRoom() {
+    roomCode = Math.random().toString(36).substring(2, 7).toUpperCase();
+    playerSign = "X";
+    db.ref("rooms/" + roomCode).set({
+        board: ["", "", "", "", "", "", "", "", ""],
+        turn: "X",
+        startingPlayer: "X",
+        status: "waiting",
+        chat: { msg: "", sender: "", time: 0 }
+    });
+    showGameUI();
+}
+
+function joinRoom() {
+    const input = document.getElementById("roomInput").value.trim().toUpperCase();
+    if (!input) return;
+    db.ref("rooms/" + input).once("value", snap => {
+        if (!snap.exists()) return alert("Room not found!");
+        roomCode = input;
+        playerSign = "O";
+        db.ref("rooms/" + roomCode).update({ status: "playing" });
+        showGameUI();
+    });
+}
+
+function showGameUI() {
+    document.getElementById("roomUI").classList.add("hidden");
+    document.getElementById("gameUI").classList.remove("hidden");
+    document.getElementById("roomDisplay").innerText = "ROOM: " + roomCode;
+    document.getElementById("playerInfo").innerText = "YOU ARE: " + playerSign;
+    listenForUpdates();
+}
+
+function sendChat(text) {
+    db.ref("rooms/" + roomCode + "/chat").set({
+        msg: text,
+        sender: playerSign,
+        time: Date.now()
+    });
+}
+
+function listenForUpdates() {
+    db.ref("rooms/" + roomCode).on("value", snap => {
+        const data = snap.val();
+        if (!data) return;
+
+        // Update Board
+        const cells = document.querySelectorAll(".cell");
+        data.board.forEach((val, i) => {
+            cells[i].innerText = val;
+            cells[i].className = val === "X" ? "cell x-mark" : val === "O" ? "cell o-mark" : "cell";
+        });
+
+        // Update Turn Info
+        if (data.status === "playing") {
+            gameActive = true;
+            document.getElementById("turnInfo").innerText = (data.turn === playerSign) ? "YOUR TURN" : "FRIEND'S TURN...";
+            document.getElementById("turnInfo").style.color = (data.turn === playerSign) ? "#10b981" : "#94a3b8";
+        }
+
+        // Handle Chat Messages
+        if (data.chat && data.chat.sender !== playerSign && data.chat.time > (Date.now() - 2000)) {
+            showPopup(data.chat.sender + ": " + data.chat.msg);
+        }
+
+        const winner = checkWinner(data.board);
+        if (winner && !isResetting) handleGameOver(winner, data.startingPlayer);
+    });
+}
+
+function showPopup(text) {
+    const p = document.getElementById("msg-popup");
+    p.innerText = text;
+    p.style.display = "block";
+    playSound('sound-msg');
+    setTimeout(() => { p.style.display = "none"; }, 3000);
+}
+
+function move(index) {
+    if (!gameActive) return;
+    db.ref("rooms/" + roomCode).once("value", snap => {
+        const data = snap.val();
+        if (data.turn === playerSign && data.board[index] === "" && data.status === "playing") {
+            playSound('sound-tap');
+            data.board[index] = playerSign;
+            data.turn = (playerSign === "X") ? "O" : "X";
+            db.ref("rooms/" + roomCode).update(data);
+        }
+    });
+}
+
+function handleGameOver(winner, lastStarter) {
+    gameActive = false;
+    isResetting = true;
+
+    if (winner === "draw") {
+        playSound('sound-draw');
+        document.getElementById("turnInfo").innerText = "IT'S A TIE!";
+    } else if (winner === playerSign) {
+        playSound('sound-win');
+        document.getElementById("turnInfo").innerText = "YOU WIN! 🎉";
+    } else {
+        playSound('sound-loss');
+        document.getElementById("turnInfo").innerText = "YOU LOST... 💀";
+    }
+
+    const nextStarter = (lastStarter === "X") ? "O" : "X";
+    setTimeout(() => {
+        if (playerSign === "X") {
+            db.ref("rooms/" + roomCode).update({
+                board: ["", "", "", "", "", "", "", "", ""],
+                turn: nextStarter,
+                startingPlayer: nextStarter,
+                status: "playing",
+                chat: { msg: "", sender: "", time: 0 }
+            });
+        }
+        isResetting = false;
+    }, 3000);
+}
+
+function checkWinner(b) {
+    const wins = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
+    for (let combo of wins) {
+        if (b[combo[0]] && b[combo[0]] === b[combo[1]] && b[combo[1]] === b[combo[2]]) return b[combo[0]];
+    }
+    return b.every(cell => cell !== "") ? "draw" : null;
+}
+</script>
+</body>
+</html><!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Pro Tic Tac Toe Online + Chat</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body { 
+            margin:0; font-family: 'Segoe UI', sans-serif;
+            background: linear-gradient(-45deg, #0f172a, #1e1b4b, #312e81, #1e293b);
+            background-size: 400% 400%;
+            animation: gradient 15s ease infinite;
+            color:#fff; display:flex; justify-content:center; align-items:center; height:100vh; overflow: hidden;
+        }
+        @keyframes gradient { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+
+        .container { 
+            background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px);
+            padding: 25px; border-radius: 20px; width: 340px; text-align: center; 
+            box-shadow: 0 20px 50px rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        h2 { margin-top: 0; color: #60a5fa; }
+        input, button { width:100%; padding:12px; margin:8px 0; border-radius: 10px; border:none; font-size:15px; box-sizing: border-box; transition: 0.3s; }
+        input { background: #334155; color: white; border: 1px solid #475569; }
+        button { background: #3b82f6; color: white; font-weight: bold; cursor:pointer; }
+        button:hover { background: #2563eb; transform: translateY(-2px); }
+
+        .board { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-top:15px; }
+        .cell { 
+            height:85px; background: rgba(51, 65, 85, 0.6); font-size:40px; 
+            display:flex; justify-content:center; align-items:center; cursor:pointer; border-radius: 12px; font-weight: bold;
+        }
+
+        /* Chat Styles */
+        .chat-box { margin-top: 15px; display: flex; flex-wrap: wrap; gap: 5px; justify-content: center; }
+        .chat-btn { width: auto; padding: 6px 10px; font-size: 12px; background: #475569; margin: 0; }
+        #msg-popup { 
+            position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
+            background: #10b981; padding: 10px 20px; border-radius: 30px; 
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3); font-weight: bold; z-index: 100;
+            display: none; animation: slideDown 0.3s ease;
+        }
+        @keyframes slideDown { from { top: -50px; } to { top: 20px; } }
+
+        .hidden { display:none; }
+        #turnInfo { font-size: 18px; color: #94a3b8; margin-bottom: 5px; }
+        .x-mark { color: #60a5fa; }
+        .o-mark { color: #f87171; }
+    </style>
+</head>
+<body>
+
+<div id="msg-popup"></div>
+
+<div class="container">
+    <h2>TIC TAC TOE</h2>
+
+    <div id="roomUI">
+        <button onclick="createRoom()">Create New Game</button>
+        <div style="color: #94a3b8; font-size: 12px;">— OR —</div>
+        <input id="roomInput" placeholder="Enter 5-digit code">
+        <button style="background: #10b981;" onclick="joinRoom()">Join Game</button>
+    </div>
+
+    <div id="gameUI" class="hidden">
+        <div id="roomDisplay" style="color:#10b981; font-weight:bold; letter-spacing:2px;"></div>
+        <p id="playerInfo" style="margin: 5px 0; font-size:14px;"></p>
+        <p id="turnInfo">Waiting...</p>
+
+        <div class="board">
+            <div class="cell" onclick="move(0)"></div>
+            <div class="cell" onclick="move(1)"></div>
+            <div class="cell" onclick="move(2)"></div>
+            <div class="cell" onclick="move(3)"></div>
+            <div class="cell" onclick="move(4)"></div>
+            <div class="cell" onclick="move(5)"></div>
+            <div class="cell" onclick="move(6)"></div>
+            <div class="cell" onclick="move(7)"></div>
+            <div class="cell" onclick="move(8)"></div>
+        </div>
+
+        <div class="chat-box">
+            <button class="chat-btn" onclick="sendChat('Hello! 👋')">Hello!</button>
+            <button class="chat-btn" onclick="sendChat('Nice move! 🔥')">Nice move!</button>
+            <button class="chat-btn" onclick="sendChat('Your turn! ⏳')">Your turn!</button>
+            <button class="chat-btn" onclick="sendChat('Good Game! 🤝')">GG!</button>
+        </div>
+    </div>
+</div>
+
+<audio id="sound-tap" src="https://raw.githubusercontent.com/jakariya11-netjon/Tic-Tac-Toe/main/pop-402322.mp3"></audio>
+<audio id="sound-win" src="https://raw.githubusercontent.com/jakariya11-netjon/Tic-Tac-Toe/main/loud-fanfare-trumpet-effect-05-412046.mp3"></audio>
+<audio id="sound-loss" src="https://raw.githubusercontent.com/jakariya11-netjon/Tic-Tac-Toe/main/loss.mp3"></audio>
+<audio id="sound-draw" src="https://raw.githubusercontent.com/jakariya11-netjon/Tic-Tac-Toe/main/tie.mp3"></audio>
+<audio id="sound-msg" src="https://assets.mixkit.co/active_storage/sfx/2354/2354-preview.mp3"></audio>
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
+<script>
+const firebaseConfig = {
+    apiKey: "AIzaSyB78J0GqZUvjmAmUsmHCTLO3vIqhQq1N8",
+    authDomain: "tic-tac-toe-online-8af06.firebaseapp.com",
+    databaseURL: "https://tic-tac-toe-online-8af06-default-rtdb.firebaseio.com",
+    projectId: "tic-tac-toe-online-8af06",
+    storageBucket: "tic-tac-toe-online-8af06.firebasestorage.app",
+    messagingSenderId: "539479661784",
+    appId: "1:539479661784:web:078147d1569fbd93280bad"
+};
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+
+let roomCode = "";
+let playerSign = "";
+let gameActive = false;
+let isResetting = false;
+
+function playSound(id) {
+    const s = document.getElementById(id);
+    if(s) { s.currentTime = 0; s.play().catch(() => {}); }
+}
+
+function createRoom() {
+    roomCode = Math.random().toString(36).substring(2, 7).toUpperCase();
+    playerSign = "X";
+    db.ref("rooms/" + roomCode).set({
+        board: ["", "", "", "", "", "", "", "", ""],
+        turn: "X",
+        startingPlayer: "X",
+        status: "waiting",
+        chat: { msg: "", sender: "", time: 0 }
+    });
+    showGameUI();
+}
+
+function joinRoom() {
+    const input = document.getElementById("roomInput").value.trim().toUpperCase();
+    if (!input) return;
+    db.ref("rooms/" + input).once("value", snap => {
+        if (!snap.exists()) return alert("Room not found!");
+        roomCode = input;
+        playerSign = "O";
+        db.ref("rooms/" + roomCode).update({ status: "playing" });
+        showGameUI();
+    });
+}
+
+function showGameUI() {
+    document.getElementById("roomUI").classList.add("hidden");
+    document.getElementById("gameUI").classList.remove("hidden");
+    document.getElementById("roomDisplay").innerText = "ROOM: " + roomCode;
+    document.getElementById("playerInfo").innerText = "YOU ARE: " + playerSign;
+    listenForUpdates();
+}
+
+function sendChat(text) {
+    db.ref("rooms/" + roomCode + "/chat").set({
+        msg: text,
+        sender: playerSign,
+        time: Date.now()
+    });
+}
+
+function listenForUpdates() {
+    db.ref("rooms/" + roomCode).on("value", snap => {
+        const data = snap.val();
+        if (!data) return;
+
+        // Update Board
+        const cells = document.querySelectorAll(".cell");
+        data.board.forEach((val, i) => {
+            cells[i].innerText = val;
+            cells[i].className = val === "X" ? "cell x-mark" : val === "O" ? "cell o-mark" : "cell";
+        });
+
+        // Update Turn Info
+        if (data.status === "playing") {
+            gameActive = true;
+            document.getElementById("turnInfo").innerText = (data.turn === playerSign) ? "YOUR TURN" : "FRIEND'S TURN...";
+            document.getElementById("turnInfo").style.color = (data.turn === playerSign) ? "#10b981" : "#94a3b8";
+        }
+
+        // Handle Chat Messages
+        if (data.chat && data.chat.sender !== playerSign && data.chat.time > (Date.now() - 2000)) {
+            showPopup(data.chat.sender + ": " + data.chat.msg);
+        }
+
+        const winner = checkWinner(data.board);
+        if (winner && !isResetting) handleGameOver(winner, data.startingPlayer);
+    });
+}
+
+function showPopup(text) {
+    const p = document.getElementById("msg-popup");
+    p.innerText = text;
+    p.style.display = "block";
+    playSound('sound-msg');
+    setTimeout(() => { p.style.display = "none"; }, 3000);
+}
+
+function move(index) {
+    if (!gameActive) return;
+    db.ref("rooms/" + roomCode).once("value", snap => {
+        const data = snap.val();
+        if (data.turn === playerSign && data.board[index] === "" && data.status === "playing") {
+            playSound('sound-tap');
+            data.board[index] = playerSign;
+            data.turn = (playerSign === "X") ? "O" : "X";
+            db.ref("rooms/" + roomCode).update(data);
+        }
+    });
+}
+
+function handleGameOver(winner, lastStarter) {
+    gameActive = false;
+    isResetting = true;
+
+    if (winner === "draw") {
+        playSound('sound-draw');
+        document.getElementById("turnInfo").innerText = "IT'S A TIE!";
+    } else if (winner === playerSign) {
+        playSound('sound-win');
+        document.getElementById("turnInfo").innerText = "YOU WIN! 🎉";
+    } else {
+        playSound('sound-loss');
+        document.getElementById("turnInfo").innerText = "YOU LOST... 💀";
+    }
+
+    const nextStarter = (lastStarter === "X") ? "O" : "X";
+    setTimeout(() => {
+        if (playerSign === "X") {
+            db.ref("rooms/" + roomCode).update({
+                board: ["", "", "", "", "", "", "", "", ""],
+                turn: nextStarter,
+                startingPlayer: nextStarter,
+                status: "playing",
+                chat: { msg: "", sender: "", time: 0 }
+            });
+        }
+        isResetting = false;
+    }, 3000);
+}
+
+function checkWinner(b) {
+    const wins = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
+    for (let combo of wins) {
+        if (b[combo[0]] && b[combo[0]] === b[combo[1]] && b[combo[1]] === b[combo[2]]) return b[combo[0]];
+    }
+    return b.every(cell => cell !== "") ? "draw" : null;
 }
 </script>
 </body>
