@@ -49,7 +49,6 @@
 
         button { background: #3b82f6; color: white; font-weight: bold; cursor:pointer; text-transform: uppercase; }
         button:hover { background: #2563eb; transform: translateY(-2px); box-shadow: 0 5px 15px rgba(59, 130, 246, 0.4); }
-        button:active { transform: translateY(0); }
 
         .board { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-top:20px; }
         .cell { 
@@ -65,7 +64,6 @@
         #roomDisplay { font-weight: bold; color: #10b981; font-size: 22px; letter-spacing: 3px; margin: 5px 0; }
         #turnInfo { font-size: 18px; color: #94a3b8; margin-bottom: 10px; }
         
-        /* Symbol Colors */
         .x-mark { color: #60a5fa; text-shadow: 0 0 15px rgba(96, 165, 250, 0.6); }
         .o-mark { color: #f87171; text-shadow: 0 0 15px rgba(248, 113, 113, 0.6); }
     </style>
@@ -101,10 +99,10 @@
     </div>
 </div>
 
-<audio id="sound-tap" src="https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3"></audio>
-<audio id="sound-win" src="https://assets.mixkit.co/active_storage/sfx/1435/1435-preview.mp3"></audio>
-<audio id="sound-loss" src="https://assets.mixkit.co/active_storage/sfx/2019/2019-preview.mp3"></audio>
-<audio id="sound-draw" src="https://assets.mixkit.co/active_storage/sfx/2017/2017-preview.mp3"></audio>
+<audio id="sound-tap" src="https://raw.githubusercontent.com/jakariya11-netjon/Tic-Tac-Toe/main/pop-402322.mp3"></audio>
+<audio id="sound-win" src="https://raw.githubusercontent.com/jakariya11-netjon/Tic-Tac-Toe/main/loud-fanfare-trumpet-effect-05-412046.mp3"></audio>
+<audio id="sound-loss" src="https://raw.githubusercontent.com/jakariya11-netjon/Tic-Tac-Toe/main/loss.mp3"></audio>
+<audio id="sound-draw" src="https://raw.githubusercontent.com/jakariya11-netjon/Tic-Tac-Toe/main/tie.mp3"></audio>
 
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
@@ -128,11 +126,12 @@ let playerSign = "";
 let gameActive = false;
 let isResetting = false;
 
-// --- SOUND WRAPPER ---
 function playSound(id) {
     const s = document.getElementById(id);
-    s.currentTime = 0;
-    s.play().catch(e => console.log("Sound blocked by browser until first click"));
+    if(s) {
+        s.currentTime = 0;
+        s.play().catch(e => console.log("Interaction needed for sound"));
+    }
 }
 
 function createRoom() {
@@ -141,8 +140,8 @@ function createRoom() {
     db.ref("rooms/" + roomCode).set({
         board: ["", "", "", "", "", "", "", "", ""],
         turn: "X",
-        status: "waiting",
-        resetTrigger: 0
+        startingPlayer: "X", // Keep track of who started
+        status: "waiting"
     });
     showGameUI();
 }
@@ -172,34 +171,30 @@ function listenForUpdates() {
         const data = snap.val();
         if (!data) return;
 
-        // 1. Update Board
         const cells = document.querySelectorAll(".cell");
         data.board.forEach((val, i) => {
             cells[i].innerText = val;
-            cells[i].className = val === "X" ? "cell x-mark" : "cell o-mark";
+            cells[i].className = val === "X" ? "cell x-mark" : val === "O" ? "cell o-mark" : "cell";
         });
 
-        // 2. Game Status
         if (data.status === "waiting") {
             document.getElementById("turnInfo").innerText = "Waiting for friend...";
             gameActive = false;
         } else if (data.status === "playing") {
             gameActive = true;
-            document.getElementById("turnInfo").innerText = (data.turn === playerSign) ? "YOUR TURN" : "THEY ARE THINKING...";
+            document.getElementById("turnInfo").innerText = (data.turn === playerSign) ? "YOUR TURN" : "FRIEND'S TURN...";
             document.getElementById("turnInfo").style.color = (data.turn === playerSign) ? "#10b981" : "#94a3b8";
         }
 
-        // 3. Winner Detection
         const winner = checkWinner(data.board);
         if (winner && !isResetting) {
-            handleGameOver(winner);
+            handleGameOver(winner, data.startingPlayer);
         }
     });
 }
 
 function move(index) {
     if (!gameActive) return;
-
     db.ref("rooms/" + roomCode).once("value", snap => {
         const data = snap.val();
         if (data.turn === playerSign && data.board[index] === "" && data.status === "playing") {
@@ -211,14 +206,13 @@ function move(index) {
     });
 }
 
-function handleGameOver(winner) {
+function handleGameOver(winner, lastStarter) {
     gameActive = false;
     isResetting = true;
 
-    // Play sounds
     if (winner === "draw") {
         playSound('sound-draw');
-        document.getElementById("turnInfo").innerText = "IT'S A DRAW!";
+        document.getElementById("turnInfo").innerText = "IT'S A TIE!";
     } else if (winner === playerSign) {
         playSound('sound-win');
         document.getElementById("turnInfo").innerText = "YOU WIN! 🎉";
@@ -227,12 +221,16 @@ function handleGameOver(winner) {
         document.getElementById("turnInfo").innerText = "YOU LOST... 💀";
     }
 
-    // 3 Second Reset Logic
+    // Determine next starter (Switch between X and O)
+    const nextStarter = (lastStarter === "X") ? "O" : "X";
+
     setTimeout(() => {
-        if (playerSign === "X") { // Only one player needs to trigger the DB reset
+        // Only X (the creator) manages the database reset to prevent conflicts
+        if (playerSign === "X") {
             db.ref("rooms/" + roomCode).update({
                 board: ["", "", "", "", "", "", "", "", ""],
-                turn: "X",
+                turn: nextStarter,
+                startingPlayer: nextStarter,
                 status: "playing"
             });
         }
@@ -250,6 +248,5 @@ function checkWinner(b) {
     return null;
 }
 </script>
-
 </body>
 </html>
